@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  UpcomingViewController.swift
 //  Movie-App
 //
 //  Created by Deotwal, Jalaj | Ronnie on 2025/12/09.
@@ -7,13 +7,11 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class UpcomingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        view.backgroundColor = .systemBackground
     }
 
-
 }
-
