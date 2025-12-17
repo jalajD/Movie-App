@@ -57,7 +57,6 @@ class HeroHeaderUIView: UIView {
     }
 
     private func applyConstraints() {
-
         let playConstraints = [
             playButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 70),
             playButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -50),
@@ -72,6 +71,11 @@ class HeroHeaderUIView: UIView {
 
         NSLayoutConstraint.activate(playConstraints)
         NSLayoutConstraint.activate(downloadConstraints)
+    }
+
+    public func configure(with model: TitleViewModel) {
+        guard let url = URL(string: "https://image.tmdb.org/t/p/w500/\(model.posterURL)") else { return }
+        heroImageView.sd_setImage(with: url, completed: nil)
     }
 
     override func layoutSubviews() {
