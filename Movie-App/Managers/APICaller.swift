@@ -14,6 +14,10 @@ struct Constants {
     static let YoutubeabaseURL = "https://youtube.googleapis.com/youtube/v3/search?"
 }
 
+enum APIError: Error {
+    case failedToGetData
+}
+
 class APICaller {
     static let shared = APICaller()
 
@@ -29,7 +33,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -47,7 +51,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -65,7 +69,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -83,7 +87,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -101,7 +105,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -119,7 +123,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -139,7 +143,7 @@ class APICaller {
                 completion(.success(response.results))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
@@ -159,7 +163,7 @@ class APICaller {
                 completion(.success(response.items[0]))
 
             } catch {
-                completion(.failure(error))
+                completion(.failure(APIError.failedToGetData))
             }
         }
         task.resume()
