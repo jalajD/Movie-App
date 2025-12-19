@@ -38,17 +38,81 @@ class HomeViewController: UIViewController {
         homeFeedTable.delegate = self
         homeFeedTable.dataSource = self
 
-        homeFeedTable.tableHeaderView = HeroHeaderUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 500))
+        homeFeedTable.tableHeaderView = headerView
         configureHeroHeaderView()
     }
 
     private func configureHeroHeaderView() {
         APICaller.shared.getTrendingMovies { [weak self] result in
+            guard let self = self else { return }
             switch result {
                 case .success(let titles):
-                    let selectedTitle = titles.randomElement()
-                    self?.randomTrendingMovie = selectedTitle
-                    self?.headerView?.configure(with: TitleViewModel(titleName: selectedTitle?.original_name ?? selectedTitle?.original_title ?? "", posterURL: selectedTitle?.poster_path ?? ""))
+                    guard let selectedTitle = titles.randomElement() else { return }
+                    self.randomTrendingMovie = selectedTitle
+
+                    DispatchQueue.main.async {
+                        let header = HeroHeaderUIView(
+                            frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 500)
+                        )
+
+                        header.configure(
+                            with: TitleViewModel(
+                                titleName: selectedTitle.original_title ?? selectedTitle.original_name ?? "",
+                                posterURL: selectedTitle.poster_path ?? ""
+                            ),
+                            title: selectedTitle
+                        )
+
+                        header.onPlayTapped = { [weak self] title in
+                            self?.openPreview(for: title)
+                        }
+
+                        header.onDownloadTapped = { [weak self] title in
+                            self?.download(title: title)
+                        }
+
+                        self.homeFeedTable.tableHeaderView = header
+                    }
+
+                case .failure(let error):
+                    print(error.localizedDescription)
+            }
+        }
+    }
+
+    private func download(title: Title) {
+        DataPersistenceManager.shared.downloadTitleWith(model: title) { result in
+            switch result {
+                case .success():
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("Downloaded"),
+                        object: nil
+                    )
+                    print("Saved successfully")
+                case .failure(let error):
+                    print(error.localizedDescription)
+            }
+        }
+    }
+
+    private func openPreview(for title: Title) {
+        guard let name = title.original_title ?? title.original_name else { return }
+
+        APICaller.shared.getMovie(with: name + " trailer") { [weak self] result in
+            switch result {
+                case .success(let video):
+                    DispatchQueue.main.async {
+                        let vc = TitlePreviewViewController()
+                        vc.configure(
+                            with: TitlePreviewViewModel(
+                                title: name,
+                                youtubeVideo: video,
+                                titleOverview: title.overview ?? ""
+                            )
+                        )
+                        vc.hidesBottomBarWhenPushed = true
+                        self?.navigationController?.pushViewController(vc, animated: true)
+                    }
                 case .failure(let error):
                     print(error.localizedDescription)
             }
@@ -186,6 +250,7 @@ extension HomeViewController: CollectionViewTableViewCellDelegate {
         DispatchQueue.main.async { [weak self] in
             let vc = TitlePreviewViewController()
             vc.configure(with: viewModel)
+            vc.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(vc, animated: true)
         }
     }

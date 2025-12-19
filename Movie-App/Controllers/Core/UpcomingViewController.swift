@@ -23,6 +23,7 @@ class UpcomingViewController: UIViewController {
         title = "Upcoming"
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationItem.largeTitleDisplayMode = .always
+        navigationController?.navigationBar.tintColor = .white
 
         view.addSubview(upcomingTable)
 
@@ -81,6 +82,7 @@ extension UpcomingViewController: UITableViewDelegate, UITableViewDataSource {
                     DispatchQueue.main.async {
                         let vc = TitlePreviewViewController()
                         vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""))
+                        vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
                     }
                 case.failure(let error):

@@ -92,6 +92,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
                     DispatchQueue.main.async {
                         let vc = TitlePreviewViewController()
                         vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""))
+                        vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
                     }
                 case.failure(let error):
@@ -130,6 +131,7 @@ extension SearchViewController: UISearchResultsUpdating, SearchResultsViewContro
         DispatchQueue.main.async { [weak self] in
             let vc = TitlePreviewViewController()
             vc.configure(with: viewModel)
+            vc.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(vc, animated: true)
         }
     }

@@ -11,7 +11,11 @@ import WebKit
 class TitlePreviewViewController: UIViewController {
 
     private let webView: WKWebView = {
-        let webView = WKWebView()
+        let config = WKWebViewConfiguration()
+        config.allowsInlineMediaPlayback = true
+        config.mediaTypesRequiringUserActionForPlayback = []
+
+        let webView = WKWebView(frame: .zero, configuration: config)
         webView.translatesAutoresizingMaskIntoConstraints = false
         return webView
     }()
@@ -42,8 +46,14 @@ class TitlePreviewViewController: UIViewController {
         return button
     }()
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         view.addSubview(webView)
         view.addSubview(titleLabel)
         view.addSubview(overviewLabel)
@@ -89,7 +99,9 @@ class TitlePreviewViewController: UIViewController {
         overviewLabel.text = model.titleOverview
 
         guard let url = URL(string: "https://www.youtube.com/embed/\(model.youtubeVideo.id.videoId)") else { return }
-
-        webView.load(URLRequest(url: url))
+        var request = URLRequest(url: url)
+        guard let bundleID = Bundle.main.bundleIdentifier else { return }
+        request.setValue("https://\(bundleID)", forHTTPHeaderField: "Referer")
+        webView.load(request)
     }
 }
