@@ -81,7 +81,7 @@ extension UpcomingViewController: UITableViewDelegate, UITableViewDataSource {
                 case .success(let videoElement):
                     DispatchQueue.main.async {
                         let vc = TitlePreviewViewController()
-                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""))
+                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""), title: title)
                         vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
                     }

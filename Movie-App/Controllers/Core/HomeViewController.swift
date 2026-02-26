@@ -28,6 +28,14 @@ class HomeViewController: UIViewController {
         return table
     }()
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationController?.navigationBar.transform = .identity
+    }
+
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -81,14 +89,23 @@ class HomeViewController: UIViewController {
     }
 
     private func download(title: Title) {
-        DataPersistenceManager.shared.downloadTitleWith(model: title) { result in
+        DataPersistenceManager.shared.downloadTitleWith(model: title) { [weak self] result in
             switch result {
-                case .success():
-                    NotificationCenter.default.post(
-                        name: NSNotification.Name("Downloaded"),
-                        object: nil
-                    )
-                    print("Saved successfully")
+                case .success(let downloadResult):
+                    switch downloadResult {
+                        case .added:
+                            NotificationCenter.default.post(
+                                name: NSNotification.Name("Downloaded"),
+                                object: nil
+                            )
+                            DispatchQueue.main.async {
+                                self?.showToast(message: "Added to downloads")
+                            }
+                        case .alreadyExists:
+                            DispatchQueue.main.async {
+                                self?.showToast(message: "Already in downloads")
+                            }
+                    }
                 case .failure(let error):
                     print(error.localizedDescription)
             }
@@ -108,7 +125,8 @@ class HomeViewController: UIViewController {
                                 title: name,
                                 youtubeVideo: video,
                                 titleOverview: title.overview ?? ""
-                            )
+                            ),
+                            title: title
                         )
                         vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
@@ -135,7 +153,8 @@ class HomeViewController: UIViewController {
         ]
 
         navigationController?.navigationBar.tintColor = .white
-
+        title = nil
+        navigationItem.backButtonTitle = "Home"
     }
     @objc private func dummyTapped() {
         // No-op or add future functionality here
@@ -246,12 +265,18 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension HomeViewController: CollectionViewTableViewCellDelegate {
 
-    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel) {
+    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel, title: Title) {
         DispatchQueue.main.async { [weak self] in
             let vc = TitlePreviewViewController()
-            vc.configure(with: viewModel)
+            vc.configure(with: viewModel, title: title)
             vc.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
+    func collectionViewTableViewCellShowToast(_ cell: CollectionViewTableViewCell, message: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.showToast(message: message)
         }
     }
 }

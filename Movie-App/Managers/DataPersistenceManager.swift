@@ -18,27 +18,44 @@ class DataPersistenceManager {
         case failedToDeleteData
     }
 
+    enum DownloadResult {
+        case added
+        case alreadyExists
+    }
+
     static let shared = DataPersistenceManager()
 
-    func downloadTitleWith(model: Title, completion: @escaping (Result<Void, Error>) -> Void) {
+    func downloadTitleWith(model: Title, completion: @escaping (Result<DownloadResult, Error>) -> Void) {
 
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
 
         let context = appDelegate.persistentContainer.viewContext
 
-        let item = TitleItem(context: context)
-        item.original_title = model.original_title
-        item.original_name = model.original_name
-        item.id = Int64(model.id)
-        item.poster_path = model.poster_path
-        item.overview = model.overview
-        item.vote_count = Int64(model.vote_count)
-        item.vote_average = model.vote_average
-        item.media_type = model.media_type
+        // Check if title already exists
+        let request: NSFetchRequest<TitleItem> = TitleItem.fetchRequest()
+        request.predicate = NSPredicate(format: "id == %d", model.id)
 
         do {
+            let existingTitles = try context.fetch(request)
+            if !existingTitles.isEmpty {
+                // Title already exists, don't save again
+                completion(.success(.alreadyExists))
+                return
+            }
+
+            // Title doesn't exist, save it
+            let item = TitleItem(context: context)
+            item.original_title = model.original_title
+            item.original_name = model.original_name
+            item.id = Int64(model.id)
+            item.poster_path = model.poster_path
+            item.overview = model.overview
+            item.vote_count = Int64(model.vote_count)
+            item.vote_average = model.vote_average
+            item.media_type = model.media_type
+
             try context.save()
-            completion(.success(()))
+            completion(.success(.added))
         } catch {
             completion(.failure(DatabaseError.failedToSaveData))
         }

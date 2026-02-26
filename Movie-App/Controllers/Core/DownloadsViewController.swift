@@ -90,15 +90,27 @@ extension DownloadsViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let title = titles[indexPath.row]
-        guard let titleName = title.original_title ?? title.original_name else { return }
+        let titleItem = titles[indexPath.row]
+        guard let titleName = titleItem.original_title ?? titleItem.original_name else { return }
+
+        let title = Title(
+            id: Int(titleItem.id),
+            media_type: titleItem.media_type,
+            original_name: titleItem.original_name,
+            original_title: titleItem.original_title,
+            poster_path: titleItem.poster_path,
+            overview: titleItem.overview,
+            vote_count: Int(titleItem.vote_count),
+            release_date: nil,
+            vote_average: titleItem.vote_average
+        )
 
         APICaller.shared.getMovie(with: titleName + " trailer") { [weak self] result in
             switch result {
                 case .success(let videoElement):
                     DispatchQueue.main.async {
                         let vc = TitlePreviewViewController()
-                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""))
+                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: titleItem.overview ?? ""), title: title)
                         vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
                     }

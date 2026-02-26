@@ -91,7 +91,7 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
                 case .success(let videoElement):
                     DispatchQueue.main.async {
                         let vc = TitlePreviewViewController()
-                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""))
+                        vc.configure(with: TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: title.overview ?? ""), title: title)
                         vc.hidesBottomBarWhenPushed = true
                         self?.navigationController?.pushViewController(vc, animated: true)
                     }
@@ -127,12 +127,18 @@ extension SearchViewController: UISearchResultsUpdating, SearchResultsViewContro
         }
     }
 
-    func searchResultsViewControllerDidTapItem(_ viewModel: TitlePreviewViewModel) {
+    func searchResultsViewControllerDidTapItem(_ viewModel: TitlePreviewViewModel, title: Title) {
         DispatchQueue.main.async { [weak self] in
             let vc = TitlePreviewViewController()
-            vc.configure(with: viewModel)
+            vc.configure(with: viewModel, title: title)
             vc.hidesBottomBarWhenPushed = true
             self?.navigationController?.pushViewController(vc, animated: true)
+        }
+    }
+
+    func searchResultsViewControllerShowToast(message: String) {
+        DispatchQueue.main.async { [weak self] in
+            self?.showToast(message: message)
         }
     }
 }

@@ -8,7 +8,8 @@
 import UIKit
 
 protocol CollectionViewTableViewCellDelegate: AnyObject {
-    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel)
+    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel, title: Title)
+    func collectionViewTableViewCellShowToast(_ cell: CollectionViewTableViewCell, message: String)
 }
 
 class CollectionViewTableViewCell: UITableViewCell {
@@ -54,10 +55,17 @@ class CollectionViewTableViewCell: UITableViewCell {
     }
 
     private func downloadTitleAt(indexPath: IndexPath) {
-        DataPersistenceManager.shared.downloadTitleWith(model: titles[indexPath.row]) { result in
+        DataPersistenceManager.shared.downloadTitleWith(model: titles[indexPath.row]) { [weak self] result in
             switch result {
-                case .success():
-                    NotificationCenter.default.post(name: NSNotification.Name("Downloaded"), object: nil)
+                case .success(let downloadResult):
+                    guard let self = self else { return }
+                    switch downloadResult {
+                        case .added:
+                            NotificationCenter.default.post(name: NSNotification.Name("Downloaded"), object: nil)
+                            self.delegate?.collectionViewTableViewCellShowToast(self, message: "Added to downloads")
+                        case .alreadyExists:
+                            self.delegate?.collectionViewTableViewCellShowToast(self, message: "Already in downloads")
+                    }
                 case .failure(let error):
                     print(error.localizedDescription)
             }
@@ -90,7 +98,7 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
                     let titleOverview = title.overview ?? ""
                     let viewModel = TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: titleOverview)
                     guard let self else { return }
-                    delegate?.collectionViewTableViewCellDidTapCell(self, viewModel: viewModel)
+                    delegate?.collectionViewTableViewCellDidTapCell(self, viewModel: viewModel, title: title)
                 case .failure(let error):
                     print(error.localizedDescription)
             }
