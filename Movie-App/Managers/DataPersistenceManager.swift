@@ -9,9 +9,7 @@ import Foundation
 import UIKit
 import CoreData
 
-
 class DataPersistenceManager {
-
     enum DatabaseError: Error {
         case failedToSaveData
         case failedToFetchData
@@ -31,19 +29,16 @@ class DataPersistenceManager {
 
         let context = appDelegate.persistentContainer.viewContext
 
-        // Check if title already exists
         let request: NSFetchRequest<TitleItem> = TitleItem.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", model.id)
 
         do {
             let existingTitles = try context.fetch(request)
             if !existingTitles.isEmpty {
-                // Title already exists, don't save again
                 completion(.success(.alreadyExists))
                 return
             }
 
-            // Title doesn't exist, save it
             let item = TitleItem(context: context)
             item.original_title = model.original_title
             item.original_name = model.original_name

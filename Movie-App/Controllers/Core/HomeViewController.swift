@@ -35,7 +35,6 @@ class HomeViewController: UIViewController {
         navigationController?.navigationBar.transform = .identity
     }
 
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -113,28 +112,10 @@ class HomeViewController: UIViewController {
     }
 
     private func openPreview(for title: Title) {
-        guard let name = title.original_title ?? title.original_name else { return }
-
-        APICaller.shared.getMovie(with: name + " trailer") { [weak self] result in
-            switch result {
-                case .success(let video):
-                    DispatchQueue.main.async {
-                        let vc = TitlePreviewViewController()
-                        vc.configure(
-                            with: TitlePreviewViewModel(
-                                title: name,
-                                youtubeVideo: video,
-                                titleOverview: title.overview ?? ""
-                            ),
-                            title: title
-                        )
-                        vc.hidesBottomBarWhenPushed = true
-                        self?.navigationController?.pushViewController(vc, animated: true)
-                    }
-                case .failure(let error):
-                    print(error.localizedDescription)
-            }
-        }
+        let vc = TitlePreviewViewController()
+        vc.configure(with: title)
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     private func configureNavBar() {
@@ -265,13 +246,11 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension HomeViewController: CollectionViewTableViewCellDelegate {
 
-    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel, title: Title) {
-        DispatchQueue.main.async { [weak self] in
-            let vc = TitlePreviewViewController()
-            vc.configure(with: viewModel, title: title)
-            vc.hidesBottomBarWhenPushed = true
-            self?.navigationController?.pushViewController(vc, animated: true)
-        }
+    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, title: Title) {
+        let vc = TitlePreviewViewController()
+        vc.configure(with: title)
+        vc.hidesBottomBarWhenPushed = true
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     func collectionViewTableViewCellShowToast(_ cell: CollectionViewTableViewCell, message: String) {

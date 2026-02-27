@@ -8,7 +8,7 @@
 import UIKit
 
 protocol CollectionViewTableViewCellDelegate: AnyObject {
-    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, viewModel: TitlePreviewViewModel, title: Title)
+    func collectionViewTableViewCellDidTapCell(_ cell: CollectionViewTableViewCell, title: Title)
     func collectionViewTableViewCellShowToast(_ cell: CollectionViewTableViewCell, message: String)
 }
 
@@ -90,19 +90,7 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let title = titles[indexPath.row]
-        guard let titleName = title.original_title ?? title.original_name else { return }
-
-        APICaller.shared.getMovie(with: titleName + " trailer") { [weak self] result in
-            switch result {
-                case .success(let videoElement):
-                    let titleOverview = title.overview ?? ""
-                    let viewModel = TitlePreviewViewModel(title: titleName, youtubeVideo: videoElement, titleOverview: titleOverview)
-                    guard let self else { return }
-                    delegate?.collectionViewTableViewCellDidTapCell(self, viewModel: viewModel, title: title)
-                case .failure(let error):
-                    print(error.localizedDescription)
-            }
-        }
+        delegate?.collectionViewTableViewCellDidTapCell(self, title: title)
     }
 
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
